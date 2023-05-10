@@ -1,8 +1,8 @@
+import { Counter } from "./Counter";
+
 function App() {
   return (
-    <div className="App">
-      All Works
-    </div>
+    <Counter />
   );
 }
 
