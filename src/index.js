@@ -1,160 +1,72 @@
-import React, { StrictMode } from 'react';
-import ReactDOM from 'react-dom/client';
-import { legacy_createStore as createStore } from 'redux';
+import { legacy_createStore as createStore, bindActionCreators } from 'redux';
+import { reducer } from './reducer';
+/* import { inc, dec, rnd } from './actions' */
 
-// Для использования Редакс устанавливаем два пакета react-redux и redux
+import * as actions from './actions'
 
-// Задаем начальное значение стэйта:
-
-/*
-  const initialState = 1;
-*/
-
-// Далее создаем редьюсер. Он должен принимать стэйт и экшн. Это обычная функция, которая
-// определяет логику работы со стэйтом. Она дальше будет использоваться в создании стора
-
-
-/* 
-  const reducer = (state = initialState, action) => {
-    switch (action.type) {
-      case 'INC':
-        return state + 1;
-      case 'DEC':
-        return state - 1;
-      case 'RND':
-        return state * action.payload;
-      default:
-        return state;
-    }
-  };
- */
-
-
-// После этого можем начать работать с редаксом. Для этого создаем стор.
-// Стор создается методом редакса createStore, в который нужно прокинуть редьюсер:
-
-/* 
 const store = createStore(reducer)
- */
 
-// Теперь стор создан, в нем есть различные методы, можно глянуть через console
-// Один из важных - getState()
-// Другой важный  - dispatch() - позволяет запускать reducer для изменения стэйта
-// Следующим кодом мы запустим reducer с типом 'INC' и значение стэйта увеличится на 1
-
-/* 
-  store.dispatch({type: 'INC'})
-  console.log(store.getState())
- */
-
-// НО реагирования UI в нативном JS никакого не будет. Для отслеживания изменения у стора
-// существует метод subscribe, который принимает колбэк (без аргументов)
-/* 
-  store.subscribe(() => console.log(store.getState()))
-  store.dispatch({type: 'INC'})
-  store.dispatch({type: 'INC'})
- */
-
-// подключим методы редьюсера к кнопкам и в подписке будем обновлять значения счетчика:
-/* 
-  const update = () => {
-    document.getElementById('counter').textContent = store.getState();
-  };
-  store.subscribe(update);
-
-
-  document.getElementById('inc').addEventListener('click', () => {
-    store.dispatch({ type: 'INC' });
-  });
-
-  document.getElementById('dec').addEventListener('click', () => {
-    store.dispatch({ type: 'DEC' });
-  });
-
-  document.getElementById('rnd').addEventListener('click', () => {
-    const value = Math.floor(Math.random() * 10);
-    store.dispatch({ type: 'RND', payload: value });
-  });
- */
-
-// То, что написано выше - можно улучшить путем создания функций-криэйторов:
-/* 
-  const inc = () => ({ type: 'INC' });
-  const dec = () => ({ type: 'DEC' });
-  const rnd = (value) => ({ type: 'RND', payload: value });
-
-  const update = () => {
-    document.getElementById('counter').textContent = store.getState();
-  };
-  store.subscribe(update);
-
-  document.getElementById('inc').addEventListener('click', () => {
-    store.dispatch(inc());
-  });
-
-  document.getElementById('dec').addEventListener('click', () => {
-    store.dispatch(dec());
-  });
-
-  document.getElementById('rnd').addEventListener('click', () => {
-    const value = Math.floor(Math.random() * 10);
-    store.dispatch(rnd(value));
-  });
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Ниже приведено все тоже самое, только в работе с объектом
-
-const initialState = {value: 1};
-
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case 'INC':
-      return {...state, value: state.value + 1 };
-    case 'DEC':
-      return {...state, value: state.value - 1 };
-    case 'RND':
-      return {...state, value: state.value * action.payload };
-    default:
-      return state;
-  }
-};
-const store = createStore(reducer)
-const inc = () => ({ type: 'INC' });
-const dec = () => ({ type: 'DEC' });
-const rnd = (value) => ({ type: 'RND', payload: value });
+const {dispatch, subscribe, getState} = store;
 
 const update = () => {
-  document.getElementById('counter').textContent = store.getState().value;
+  document.getElementById('counter').textContent = getState().value;
 };
-store.subscribe(update);
 
-document.getElementById('inc').addEventListener('click', () => {
-  store.dispatch(inc());
-});
+subscribe(update);
 
-document.getElementById('dec').addEventListener('click', () => {
-  store.dispatch(dec());
-});
+// создадим функции, которые сами будут диспатчить что нужно:
 
+  // const incDispatch = () => dispatch(inc())
+  // const decDispatch = () => dispatch(dec())
+  // const rndDispatch = (value) => dispatch(rnd(value))
+
+
+
+// сделаем тоже самое что и на предыдущем шаге, но при помощи заранее созданной
+// универсальной функции bindActionCreator:
+
+// Вызов bindActionCreator вернет функцию, которая будет принимать любой количество агрументов
+// и диспачить с ними переданный ей creator. Суть того, что она вернет будет такая же как и в примере\
+// выше:
+
+/* 
+  const bindActionCreator = (creator, dispatch) =>
+    (...args) => {
+      dispatch(creator(...args))
+    }
+
+    const incDispatch = bindActionCreator(inc, dispatch)
+    const decDispatch = bindActionCreator(dec, dispatch)
+    const rndDispatch = bindActionCreator(rnd, dispatch)
+ */
+
+  // Вот это вот, на самом деле, иллюстрация существующего в redux метода bindActionCreators,
+  // который делает все тоже самое
+/* 
+    const incDispatch = bindActionCreators(inc, dispatch)
+    const decDispatch = bindActionCreators(dec, dispatch)
+    const rndDispatch = bindActionCreators(rnd, dispatch)
+ */
+
+    // Прикол этого метода в том, что он в качестве первого аргумента может принимать объект
+    // И в таком случае он вернет объект криэйторов:
+/* 
+    const {incDispatch, decDispatch, rndDispatch} = bindActionCreators({
+      incDispatch: inc,
+      decDispatch: dec,
+      rndDispatch: rnd,
+    }, dispatch)
+ */
+
+    // правильно импортировав экшены, можно неимерверно сокартить код:
+    const {inc, dec, rnd} = bindActionCreators(actions, dispatch)
+
+
+
+document.getElementById('inc').addEventListener('click', inc);
+document.getElementById('dec').addEventListener('click', dec);
 document.getElementById('rnd').addEventListener('click', () => {
   const value = Math.floor(Math.random() * 10);
-  store.dispatch(rnd(value));
+  rnd(value);
 });
 
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<StrictMode></StrictMode>);
