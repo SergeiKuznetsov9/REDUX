@@ -1,10 +1,12 @@
 import { useCallback } from "react";
 import { useSelector } from "react-redux";
+import { createSelector } from "reselect";
 
 import { useHttp } from "../../hooks/http.hook";
 import { HeroesListItem } from "../heroesListItem/HeroesListItem";
 import { heroRemoving, heroRemoved, heroRemovingError } from "../../actions";
 import { Spinner } from "../spinner/Spinner";
+
 
 // Задача для этого компонента:
 // При клике на "крестик" идет удаление персонажа из общего состояния
@@ -12,15 +14,24 @@ import { Spinner } from "../spinner/Spinner";
 // Удаление идет и с json файла при помощи метода DELETE
 
 export const HeroesList = () => {
-  const { heroesLoadingStatus } = useSelector((state) => state.heroes);
-  const { activeFilters } = useSelector((state) => state.filters);
-  const heroes = useSelector((state) => {
-    if (activeFilters[0] === "all") {
-      return state.heroes.heroes;
-    }
 
-    return state.heroes.heroes.filter((hero) => activeFilters.includes(hero.element));
-  });
+  console.log('hi')
+
+  const { heroesLoadingStatus } = useSelector((state) => state.heroes);
+
+  const filteredHeroesSelector = createSelector(
+    state => state.filters.activeFilters,
+    state => state.heroes.heroes,
+    (filters, heroes) => {
+      if (filters[0] === "all") {
+        return heroes;
+      }  
+      return heroes.filter((hero) => filters.includes(hero.element));
+    }
+  )
+
+  const heroes = useSelector(filteredHeroesSelector);
+
   const { request } = useHttp();
 
   const onDelete = useCallback(
