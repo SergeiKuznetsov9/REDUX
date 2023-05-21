@@ -15,8 +15,6 @@ import { Spinner } from "../spinner/Spinner";
 
 export const HeroesList = () => {
 
-  console.log('hi')
-
   const { heroesLoadingStatus } = useSelector((state) => state.heroes);
 
   const filteredHeroesSelector = createSelector(

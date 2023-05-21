@@ -11,9 +11,15 @@ import {
   optionsFetched,
 } from "../../actions";
 import "./app.scss";
+import { useDispatch, useSelector } from "react-redux";
 
 export const App = () => {
   const { request } = useHttp();
+
+/*   const fetching = useSelector( state => state.heroes.heroesLoadingStatus)
+  console.log(fetching)
+
+  const dispatch = useDispatch() */
 
   useEffect(() => {
     request("http://localhost:3001/filters")
@@ -23,6 +29,7 @@ export const App = () => {
       .catch(() => console.log("Произошла ошибка загрузки"));
 
     heroesFetching();
+/*     dispatch("HEROES_FETCHING") */
     request("http://localhost:3001/heroes")
       .then((data) => heroesFetched(data))
       .catch(() => heroesFetchingError());
