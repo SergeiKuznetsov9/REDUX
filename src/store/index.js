@@ -1,33 +1,47 @@
-import { legacy_createStore as createStore, combineReducers } from "redux";
+import {
+  legacy_createStore as createStore,
+  combineReducers,
+  compose,
+  applyMiddleware,
+} from 'redux';
+
+
 import { heroes } from "../reducers/heroes";
 import { filters } from "../reducers/filters";
 
-const enhancer = 
-  (createStore1) => {
-  return (...args) => {
-  const store = createStore1(...args);
+const stringMiddleware = 
+// он автоматически получит созданный стор в качестве аргумента
+// далее он вернет функцию, которая автоматически получит в качестве аргумента dispatch
+// эта функция в свою очередь вернет следующую функцию, которая в качестве аргумента 
+// автоматически получит action
 
-  const oldDispatch = store.dispatch;
-  store.dispatch = (action) => {
-    if(typeof action === 'string') {
-      return oldDispatch({
+// далее мы проверим тип этого action и в зависимости от результата совершим то или
+// иное действие
+
+// Таким образом, при вызове dispatch автоматически будет вызвана его переопределенная версия
+
+// эта переопределенная версия в свою очередь будет вызывать следующий middleware, если он конечно же есть
+// Поэтому этот переопределенный dispatch в документах называпется next
+
+// чтобы вся эта цепочка заработала, все эти мидлвары нужно закинуть в функцию applyMiddleware
+
+  (store) => (dispatch) => (action) => {
+    if (typeof action === 'string') {
+      return dispatch({
         type: action
       })
     }
-    return oldDispatch(action)
+    return dispatch(action)
   }
-  return store
-}}
 
 const store = createStore(
   combineReducers({heroes, filters}),
 
-  // enhancer представляет собой функцию, которая в качестве аргумента принимает 
-  // функцию createStore и возвращает другую функцию, создающую модифицированный стор
-  // при передаче его сюда, это все автоматически обрабатывается, createStore прокидывается 
-  // автоматически
-  enhancer,
+  applyMiddleware(stringMiddleware),
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+
+
+
 );
 
 export default store;
