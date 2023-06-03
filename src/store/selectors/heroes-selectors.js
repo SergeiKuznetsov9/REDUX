@@ -1,8 +1,9 @@
 export const elementOptionsSelector = (state) =>
   state.filtersReducer.filters.filter((option) => option.name !== "all");
 
-export const heroesLoadingStatusSelector = (state) =>
-  state.heroesReducer.heroes.heroesLoadingStatus;
+export const heroesLoadingStatusSelector = (state) => {
+  return state.heroesReducer.heroes.heroesLoadingStatus;
+}
 
 export const filteredHeroesSelector = (state) => {
   const activeFilters = state.filtersReducer.activeFilters;

@@ -2,8 +2,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { useHttp } from "../../hooks/http.hook";
-import { heroCreatingThunk } from "../../store/thunk/heroes-thunk";
 import { elementOptionsSelector } from "../../store/selectors/heroes-selectors";
+import { createHeroAsyncThunk } from "../../store/slices/heroesSlice";
 
 const defaultValues = {
   name: "",
@@ -27,7 +27,7 @@ export const HeroesAddForm = () => {
   const onSubmit = async (data) => {
     data.id = uuidv4();
 
-    dispatch(heroCreatingThunk({ request, data, reset }));
+    dispatch(createHeroAsyncThunk({ data, reset }));
   };
 
   return (

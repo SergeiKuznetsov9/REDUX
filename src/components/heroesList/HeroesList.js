@@ -1,18 +1,16 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { useHttp } from "../../hooks/http.hook";
 import { HeroesListItem } from "../heroesListItem/HeroesListItem";
 import { Spinner } from "../spinner/Spinner";
-import { heroRemovingThunk } from "../../store/thunk/heroes-thunk";
 import {
   filteredHeroesSelector,
   heroesLoadingStatusSelector,
 } from "../../store/selectors/heroes-selectors";
+import { removeHeroAsyncThunk } from "../../store/slices/heroesSlice";
 
 export const HeroesList = () => {
   const dispatch = useDispatch();
-  const { request } = useHttp();
 
   const heroesLoadingStatus = useSelector(heroesLoadingStatusSelector);
 
@@ -20,10 +18,10 @@ export const HeroesList = () => {
 
   const onDelete = useCallback(
     (id) => {
-      dispatch(heroRemovingThunk({ id, request, heroes }));
+      dispatch(removeHeroAsyncThunk({ id, heroes }));
     },
 
-    [request, heroes, dispatch]
+    [heroes, dispatch]
   );
 
   if (heroesLoadingStatus === "loading") {
